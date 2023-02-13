@@ -6,9 +6,9 @@ import {
   Resolver,
   Root,
 } from '@nestjs/graphql';
-import { Cut } from './models/cut.model';
-import { Film } from './models/film.model';
-import ghibliData from './data/ghibli';
+import { Cut } from '../entity/cut.entity';
+import { Film } from '../entity/film.entity';
+import ghibliData from '../data/ghibli';
 
 @Resolver(Cut)
 export class CutResolver {

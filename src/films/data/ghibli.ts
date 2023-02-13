@@ -1,4 +1,4 @@
-import { Film } from '../models/film.model';
+import { Film } from '../entity/film.entity';
 
 interface Cut {
   id: number;

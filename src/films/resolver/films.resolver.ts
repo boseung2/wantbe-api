@@ -8,9 +8,9 @@ import {
   Int,
   Args,
 } from '@nestjs/graphql';
-import { Film } from './models/film.model';
-import { Director } from './models/director.model';
-import ghibliData from './data/ghibli';
+import { Film } from '../entity/film.entity';
+import { Director } from '../entity/director.entity';
+import ghibliData from '../data/ghibli';
 
 @ObjectType()
 class PaginatedFilms {

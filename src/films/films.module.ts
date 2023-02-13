@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { FilmResolver } from './films.resolver';
-import { CutResolver } from './cuts.resolver';
+import { FilmResolver } from './resolver/films.resolver';
+import { CutResolver } from './resolver/cuts.resolver';
 
 @Module({
   providers: [FilmResolver, CutResolver],
