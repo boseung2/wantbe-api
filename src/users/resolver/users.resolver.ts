@@ -1,37 +1,48 @@
-import { Args, Field, InputType, Mutation, Resolver } from '@nestjs/graphql';
-import * as argon2 from 'argon2';
-import { IsEmail, IsString } from 'class-validator';
+import { Args, Mutation, Resolver, ObjectType, Field } from '@nestjs/graphql';
+
 import User from '../entity/user.entity';
+import LoginInput from '../input/login.input';
+import SignUpInput from '../input/sign-up.input';
+import { UsersService } from '../uesrs.service';
 
-@InputType()
-export class SignUpInput {
+@ObjectType({ description: '필드 에러 타입' })
+class FieldError {
   @Field()
-  @IsEmail()
-  email: string;
-
-  @Field()
-  @IsString()
-  username: string;
+  field: string;
 
   @Field()
-  @IsString()
-  password: string;
+  message: string;
+}
+
+@ObjectType({ description: '로그인 반환 데이터' })
+class LoginResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => User, { nullable: true })
+  user?: User;
+
+  @Field({ nullable: true })
+  accessToken?: string;
 }
 
 @Resolver(User)
 export class UsersResolver {
+  constructor(private usersService: UsersService) {}
+
   @Mutation(() => User)
   async signUp(@Args('signUpInput') signUpInput: SignUpInput): Promise<User> {
     const { email, username, password } = signUpInput;
 
-    const hashedPw = await argon2.hash(password);
-    const newUser = User.create({
-      email,
-      username,
-      password: hashedPw,
-    });
+    return this.usersService.createUser(email, username, password);
+  }
 
-    await User.insert(newUser);
-    return newUser;
+  @Mutation(() => LoginResponse)
+  async login(
+    @Args('loginInput') loginInput: LoginInput,
+  ): Promise<LoginResponse> {
+    const { emailOrUsername, password } = loginInput;
+
+    return this.usersService.login(emailOrUsername, password);
   }
 }
