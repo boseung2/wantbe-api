@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { Res, UseGuards } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -6,6 +6,8 @@ import {
   ObjectType,
   Field,
   Query,
+  Context,
+  GraphQLExecutionContext,
 } from '@nestjs/graphql';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import User from '../entity/user.entity';
@@ -13,6 +15,7 @@ import LoginInput from '../input/login.input';
 import SignUpInput from '../input/sign-up.input';
 import { UsersService } from '../uesrs.service';
 import { GqlAuthGuard } from '../../auth/guard/gql-auth.guard';
+import { Response } from 'express';
 
 @ObjectType({ description: '필드 에러 타입' })
 class FieldError {
@@ -49,10 +52,11 @@ export class UsersResolver {
   @Mutation(() => LoginResponse)
   async login(
     @Args('loginInput') loginInput: LoginInput,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponse> {
     const { emailOrUsername, password } = loginInput;
 
-    return this.usersService.login(emailOrUsername, password);
+    return this.usersService.login(emailOrUsername, password, response.req.res);
   }
 
   @UseGuards(GqlAuthGuard)

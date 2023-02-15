@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import User from './entity/user.entity';
 import * as argon2 from 'argon2';
+import { Response } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +27,7 @@ export class UsersService {
     return newUser;
   }
 
-  async login(emailOrUsername: string, password: string) {
+  async login(emailOrUsername: string, password: string, response: Response) {
     const user = await this.userRepository.findOne({
       where: [{ email: emailOrUsername }, { username: emailOrUsername }],
     });
@@ -49,6 +50,9 @@ export class UsersService {
     }
 
     const accessToken = this.authService.createAccessToken(user.id);
+    const refreshToken = this.authService.createRefreshToken(user.id);
+
+    this.setRefreshTokenHeader(response, refreshToken);
 
     return { user, accessToken };
   }
@@ -61,5 +65,13 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  private setRefreshTokenHeader(response: Response, refreshToken: string) {
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
   }
 }

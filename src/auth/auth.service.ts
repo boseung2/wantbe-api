@@ -13,7 +13,7 @@ export class AuthService {
     return accessToken;
   }
 
-  verifyAccessToken = (accessToken?: string) => {
+  verifyAccessToken(accessToken?: string) {
     if (!accessToken) return null;
 
     try {
@@ -23,5 +23,13 @@ export class AuthService {
     } catch (err) {
       throw new AuthenticationError('access token expired');
     }
-  };
+  }
+
+  createRefreshToken(userId: number) {
+    const userData = { userId };
+
+    return this.jwtService.sign(userData, {
+      expiresIn: '14d',
+    });
+  }
 }

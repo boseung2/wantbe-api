@@ -17,6 +17,7 @@ export class GqlAuthGuard implements CanActivate {
     const accessToken = authorization.split(' ')[1];
     const { userId } = this.authService.verifyAccessToken(accessToken);
 
+    // req 객체에 userId 넣는다.
     gqlContext.req.userId = userId;
 
     return !!userId;

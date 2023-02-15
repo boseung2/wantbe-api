@@ -10,6 +10,10 @@ import { UsersModule } from './users/users.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      cors: {
+        origin: ['http://localhost:3000', 'https://studio.apollographql.com'],
+        credentials: true,
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
