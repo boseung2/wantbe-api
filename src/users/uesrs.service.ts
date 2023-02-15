@@ -52,4 +52,14 @@ export class UsersService {
 
     return { user, accessToken };
   }
+
+  async getUser(id: number) {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      return undefined;
+    }
+
+    return user;
+  }
 }

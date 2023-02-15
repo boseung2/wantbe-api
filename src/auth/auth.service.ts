@@ -1,18 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
-
-const DEFAULT_JWT_SECRET_KEY = 'secret-key';
+import { JwtService } from '@nestjs/jwt';
+import { AuthenticationError } from 'apollo-server-express';
 
 @Injectable()
 export class AuthService {
+  constructor(private jwtService: JwtService) {}
+
   createAccessToken(userId: number) {
     const userData = { userId };
-    const accessToken = jwt.sign(
-      userData,
-      process.env.JWT_SECRET_KEY || DEFAULT_JWT_SECRET_KEY,
-      { expiresIn: '30m' },
-    );
+    const accessToken = this.jwtService.sign(userData);
 
     return accessToken;
   }
+
+  verifyAccessToken = (accessToken?: string) => {
+    if (!accessToken) return null;
+
+    try {
+      const verified = this.jwtService.verify(accessToken);
+
+      return verified;
+    } catch (err) {
+      throw new AuthenticationError('access token expired');
+    }
+  };
 }
