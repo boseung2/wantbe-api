@@ -8,7 +8,7 @@ const DEFAULT_JWT_SECRET_KEY = 'secret-key';
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY || DEFAULT_JWT_SECRET_KEY,
-      signOptions: { expiresIn: '30m' },
+      signOptions: { expiresIn: '10s' },
     }),
   ],
   providers: [

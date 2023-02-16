@@ -4,8 +4,9 @@ import { Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import User from './entity/user.entity';
 import * as argon2 from 'argon2';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { CacheDBService } from '../cache/cache.service';
+import { readdirSync } from 'fs';
 
 @Injectable()
 export class UsersService {
@@ -70,11 +71,38 @@ export class UsersService {
     return user;
   }
 
+  async refreshAccessToken(req: Request) {
+    const refreshToken = req.cookies.refreshtoken;
+    console.log(refreshToken);
+    if (!refreshToken) return null;
+
+    const { userId } = this.authService.verifyAccessToken(refreshToken);
+    if (!userId) return null;
+
+    const storedRefreshToken = await this.cacheDBService.get(String(userId));
+    if (!storedRefreshToken) return null;
+    if (!(storedRefreshToken === refreshToken)) return null;
+
+    const user = await this.getUser(userId);
+    if (!user) return null;
+
+    const newAccessToken = this.authService.createAccessToken(user.id);
+    const newRefreshToken = this.authService.createRefreshToken(user.id);
+    await this.cacheDBService.set(String(user.id), newRefreshToken);
+
+    this.setRefreshTokenHeader(req.res, newRefreshToken);
+
+    return {
+      accessToken: newAccessToken,
+    };
+  }
+
   private setRefreshTokenHeader(response: Response, refreshToken: string) {
-    response.cookie('refreshToken', refreshToken, {
+    console.log('refresh');
+    response.cookie('refreshtoken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
     });
   }
 }

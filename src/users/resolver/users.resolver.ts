@@ -6,6 +6,7 @@ import {
   ObjectType,
   Field,
   Query,
+  Context,
 } from '@nestjs/graphql';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import User from '../entity/user.entity';
@@ -13,7 +14,7 @@ import LoginInput from '../input/login.input';
 import SignUpInput from '../input/sign-up.input';
 import { UsersService } from '../uesrs.service';
 import { GqlAuthGuard } from '../../auth/guard/gql-auth.guard';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @ObjectType({ description: '필드 에러 타입' })
 class FieldError {
@@ -34,6 +35,11 @@ class LoginResponse {
 
   @Field({ nullable: true })
   accessToken?: string;
+}
+
+@ObjectType({ description: '엑세스 토큰 새로고침 반환 데이터' })
+class RefreshAccessTokenResponse {
+  @Field() accessToken: string;
 }
 
 @Resolver(User)
@@ -61,5 +67,10 @@ export class UsersResolver {
   @Query(() => User, { nullable: true })
   async me(@CurrentUser() userId: number): Promise<User> {
     return this.usersService.getUser(userId);
+  }
+
+  @Mutation(() => RefreshAccessTokenResponse, { nullable: true })
+  async refreshAccessToken(@Context('req') req: Request) {
+    this.usersService.refreshAccessToken(req);
   }
 }
