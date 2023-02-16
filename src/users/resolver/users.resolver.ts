@@ -6,8 +6,6 @@ import {
   ObjectType,
   Field,
   Query,
-  Context,
-  GraphQLExecutionContext,
 } from '@nestjs/graphql';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import User from '../entity/user.entity';

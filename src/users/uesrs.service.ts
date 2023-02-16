@@ -5,6 +5,7 @@ import { AuthService } from '../auth/auth.service';
 import User from './entity/user.entity';
 import * as argon2 from 'argon2';
 import { Response } from 'express';
+import { CacheDBService } from '../cache/cache.service';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +13,7 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private authService: AuthService,
+    private cacheDBService: CacheDBService,
   ) {}
 
   async createUser(email: string, username: string, password: string) {
@@ -52,6 +54,7 @@ export class UsersService {
     const accessToken = this.authService.createAccessToken(user.id);
     const refreshToken = this.authService.createRefreshToken(user.id);
 
+    this.cacheDBService.set(String(user.id), refreshToken);
     this.setRefreshTokenHeader(response, refreshToken);
 
     return { user, accessToken };
